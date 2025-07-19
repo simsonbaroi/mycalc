@@ -1,0 +1,1827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculator</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Orbitron', monospace;
+      background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      transition: all 0.3s ease;
+      color: #e0e0e0;
+    }
+
+    .main-container {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      justify-content: center;
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    .tokens-sidebar {
+      width: 300px;
+      min-height: 400px;
+      background: linear-gradient(145deg, #f9fafb 0%, #f3f4f6 100%);
+      border: 2px inset #d1d5db;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      display: none;
+    }
+
+    body.dark .tokens-sidebar {
+      background: linear-gradient(145deg, #2a2a2a 0%, #1f1f1f 100%);
+      border: 2px inset #555555;
+      color: #e0e0e0;
+    }
+
+    .tokens-sidebar.show {
+      display: block;
+    }
+
+    body.dark {
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    }
+
+    h1 {
+      font-family: 'Orbitron', monospace;
+      color: #2c3e50;
+      margin-bottom: 30px;
+      font-size: 2.8em;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      font-weight: 900;
+      letter-spacing: 3px;
+    }
+
+    body.dark h1 {
+      color: #ecf0f1;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .calculator {
+      background: linear-gradient(145deg, #f5f3e8 0%, #e8e6db 100%);
+      border: 3px solid #beb8a0;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 
+        0 15px 35px rgba(0,0,0,0.3),
+        inset 0 2px 5px rgba(255,255,255,0.8),
+        inset 0 -2px 5px rgba(0,0,0,0.1);
+      max-width: 420px;
+      width: 100%;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    body.dark .calculator {
+      background: linear-gradient(145deg, #1e1e2f 0%, #16213e 100%);
+      border: 3px solid #4a5568;
+      box-shadow: 
+        0 15px 35px rgba(0,0,0,0.8),
+        inset 0 2px 5px rgba(255, 255, 255, 0.1),
+        inset 0 -2px 5px rgba(0,0,0,0.5);
+    }
+
+    
+
+    /* Paper roll container */
+    .paper-roll-container {
+      position: relative;
+      width: 100%;
+      height: 60px;
+      margin: 20px 0;
+      overflow: visible;
+      background: linear-gradient(145deg, #2a2a2a 0%, #1f1f1f 100%);
+      border: 2px inset #555555;
+      border-radius: 8px;
+      box-shadow: 
+        inset 0 2px 8px rgba(0,0,0,0.5),
+        0 1px 3px rgba(0,0,0,0.3);
+      z-index: 1;
+    }
+
+    body.dark .paper-roll-container {
+      background: linear-gradient(145deg, #1a1a1a 0%, #0f0f0f 100%);
+      border: 2px inset #333333;
+    }
+
+    /* Paper emergence effect from slot */
+    .paper-roll-container::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 2.25in;
+      height: 4px; /* Reduced height to match slot better */
+      background: linear-gradient(to right, 
+        #ffffff 0%, 
+        #fefefe 50%,
+        #ffffff 100%);
+      border-left: 1px solid #e8e8e8;
+      border-right: 1px solid #e8e8e8;
+      border-top: none;
+      border-bottom: none;
+      z-index: 15;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .paper-roll-container.has-tape::after {
+      opacity: 1;
+    }
+
+    /* Paper roll bridge between slot and tape */
+    .paper-roll-container::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 2.25in;
+      height: 6px;
+      background: linear-gradient(to right, 
+        #ffffff 0%, 
+        #fefefe 25%,
+        #ffffff 50%,
+        #fefefe 75%,
+        #ffffff 100%);
+      border-left: 1px solid #e8e8e8;
+      border-right: 1px solid #e8e8e8;
+      z-index: 101; /* Higher than tape to appear above calculator */
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      box-shadow: 
+        0 1px 2px rgba(0,0,0,0.1),
+        inset 0 1px 0 rgba(255,255,255,0.8);
+      /* Paper perforations on bridge */
+      background-image: 
+        radial-gradient(circle at 4px 3px, transparent 1px, #ffffff 1px),
+        radial-gradient(circle at calc(2.25in - 4px) 3px, transparent 1px, #ffffff 1px);
+      background-size: 8px 6px, 8px 6px;
+      background-position: left center, right center;
+      background-repeat: no-repeat;
+    }
+
+    .paper-roll-container.has-tape::before {
+      opacity: 1;
+    }
+
+    /* Paper roll slot */
+    .paper-slot {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 2.25in; /* Match tape width exactly */
+      height: 3px;
+      background: linear-gradient(180deg, #1a1a1a 0%, #333333 50%, #1a1a1a 100%);
+      border-radius: 2px;
+      box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.8),
+        0 1px 0 rgba(255,255,255,0.1);
+      z-index: 2;
+    }
+
+
+
+    /* Paper guide rails */
+    .paper-slot::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: 0;
+      right: 0;
+      height: 7px;
+      background: linear-gradient(180deg, 
+        rgba(255,255,255,0.1) 0%, 
+        rgba(0,0,0,0.2) 50%,
+        rgba(255,255,255,0.1) 100%);
+      border-radius: 2px;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
+    }
+
+    /* Paper tape container - Enhanced scrolling */
+    .paper-tape {
+      position: absolute;
+      bottom: calc(100% + 3px); /* Start above the paper roll bridge */
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2.25in; /* Standard adding machine tape width */
+      background: linear-gradient(to right, 
+        #ffffff 0%, 
+        #ffffff 5%, 
+        #fefefe 10%,
+        #ffffff 15%,
+        #fefefe 20%,
+        #ffffff 25%,
+        #fefefe 30%,
+        #ffffff 35%,
+        #fefefe 40%,
+        #ffffff 45%,
+        #fefefe 50%,
+        #ffffff 55%,
+        #fefefe 60%,
+        #ffffff 65%,
+        #fefefe 70%,
+        #ffffff 75%,
+        #fefefe 80%,
+        #ffffff 85%,
+        #fefefe 90%,
+        #ffffff 95%,
+        #ffffff 100%);
+      border-left: 1px solid #e8e8e8;
+      border-right: 1px solid #e8e8e8;
+      border-top: none; /* Remove top border to blend seamlessly with slot */
+      /* Add top margin to ensure no gap */
+      margin-top: 1px;
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      color: #1a1a1a;
+      box-shadow: 
+        -2px 0 6px rgba(0,0,0,0.15),
+        2px 0 6px rgba(0,0,0,0.15),
+        0 -2px 8px rgba(0,0,0,0.2);
+      transition: opacity 0.3s ease, box-shadow 0.3s ease;
+      max-height: 400px; /* Increased height for better scrolling */
+      min-height: 100px; /* Increased minimum height to show more content area */
+      overflow-y: auto;
+      overflow-x: hidden;
+      opacity: 0;
+      z-index: 100; /* Much higher z-index to appear above calculator elements */
+      display: flex;
+      flex-direction: column;
+      /* Enhanced scrolling properties */
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
+      scroll-behavior: smooth;
+      touch-action: pan-y;
+      /* Ensure proper interaction */
+      pointer-events: auto;
+      /* Add padding for better touch targets */
+      padding: 4px 0;
+    }
+
+    /* Paper tape perforations - positioned behind text */
+    .paper-tape::before {
+      content: '';
+      position: absolute;
+      left: -1px;
+      top: 0;
+      bottom: 0;
+      width: 8px;
+      background-image: 
+        radial-gradient(circle at 4px 8px, transparent 1.5px, #ffffff 1.5px),
+        radial-gradient(circle at 4px 24px, transparent 1.5px, #ffffff 1.5px),
+        radial-gradient(circle at 4px 40px, transparent 1.5px, #ffffff 1.5px);
+      background-size: 8px 16px;
+      background-repeat: repeat-y;
+      border-right: 1px solid #f0f0f0;
+      z-index: -1; /* Behind the text */
+    }
+
+    .paper-tape::after {
+      content: '';
+      position: absolute;
+      right: -1px;
+      top: 0;
+      bottom: 0;
+      width: 8px;
+      background-image: 
+        radial-gradient(circle at 4px 8px, transparent 1.5px, #ffffff 1.5px),
+        radial-gradient(circle at 4px 24px, transparent 1.5px, #ffffff 1.5px),
+        radial-gradient(circle at 4px 40px, transparent 1.5px, #ffffff 1.5px);
+      background-size: 8px 16px;
+      background-repeat: repeat-y;
+      border-left: 1px solid #f0f0f0;
+      z-index: -1; /* Behind the text */
+    }
+
+    /* Enhanced hover state for better interaction */
+    .paper-tape:hover {
+      box-shadow: 
+        2px -2px 12px rgba(0,0,0,0.4),
+        inset 0 -1px 0 rgba(255,255,255,0.8),
+        0 0 0 2px rgba(100, 100, 100, 0.3);
+      z-index: 60; /* Even higher on hover */
+      cursor: pointer;
+    }
+
+    /* Active state for click feedback */
+    .paper-tape:active {
+      box-shadow: 
+        1px -1px 6px rgba(0,0,0,0.3),
+        inset 0 -1px 0 rgba(255,255,255,0.6),
+        0 0 0 3px rgba(100, 100, 100, 0.5);
+      transform: translateX(-50%) scale(0.98);
+    }
+
+    .paper-tape.visible {
+      opacity: 1;
+    }
+
+    body.dark .paper-tape {
+      background: linear-gradient(145deg, #f0f0f0 0%, #e8e8e8 100%);
+      border: 1px solid #cccccc;
+      border-bottom: none;
+      color: #222222;
+    }
+
+    /* Individual paper entries */
+    .paper-entry {
+      padding: 3px 12px 3px 16px;
+      text-align: right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      opacity: 0;
+      transform: translateY(-10px);
+      animation: entrySlideIn 0.4s ease-out forwards;
+      line-height: 1.4;
+      font-weight: 500;
+      position: relative;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      min-height: 16px;
+      z-index: 102; /* Highest z-index for emergence effect */
+      /* Ensure entries are interactive */
+      pointer-events: auto;
+      /* Ensure text is readable over background */
+      background: rgba(255,255,255,0.95);
+    }
+
+    /* Manual entries (printed with #) are left-aligned and black */
+    .paper-entry.manual-entry {
+      text-align: left;
+      padding: 3px 16px 3px 12px;
+      font-weight: 800;
+      color: #1a1a1a;
+      background: rgba(255,255,255,0.98);
+      text-shadow: 0 0 0.5px rgba(26,26,26,0.8);
+    }
+
+    /* Add subtle zebra striping like real adding machine tape */
+    .paper-entry:nth-child(even) {
+      background: rgba(245,245,245,0.3);
+    }
+
+    /* Simulate light print impression on paper */
+    .paper-entry {
+      text-shadow: 0 0 0.5px rgba(26,26,26,0.8);
+    }
+
+    body.dark .paper-entry {
+      background: rgba(240,240,240,0.95);
+      color: #222222;
+    }
+
+    body.dark .paper-entry:nth-child(even) {
+      background: rgba(235,235,235,0.95);
+    }
+
+    body.dark .paper-entry.manual-entry {
+      background: rgba(245,245,245,0.98);
+      color: #1a1a1a;
+      text-shadow: 0 0 0.5px rgba(26,26,26,0.8);
+    }
+
+    /* Red text entries (like subtraction) stay right-aligned but are red */
+    .paper-entry.red-text {
+      color: #dc2626;
+      text-shadow: 0 0 0.5px rgba(220,38,38,0.8);
+      font-weight: 600;
+    }
+
+    body.dark .paper-entry.red-text {
+      color: #ef4444;
+      text-shadow: 0 0 0.5px rgba(239,68,68,0.8);
+    }
+
+    body.dark .paper-strip.red-text {
+      color: #ef4444;
+      text-shadow: 0 0 0.5px rgba(239,68,68,0.8);
+    }
+
+    /* Enhanced scrollbar for better usability */
+    .paper-tape::-webkit-scrollbar {
+      width: 18px;
+    }
+
+    .paper-tape::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.15);
+      border-radius: 9px;
+      border: 2px solid rgba(255,255,255,0.8);
+      margin: 4px 0;
+    }
+
+    .paper-tape::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.8) 100%);
+      border-radius: 9px;
+      border: 2px solid rgba(255,255,255,0.4);
+      min-height: 60px;
+      transition: background 0.2s ease;
+    }
+
+    .paper-tape::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.9) 100%);
+      border: 2px solid rgba(255,255,255,0.6);
+    }
+
+    .paper-tape::-webkit-scrollbar-thumb:active {
+      background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,1) 100%);
+      border: 2px solid rgba(255,255,255,0.8);
+    }
+
+    /* Scrollbar corner */
+    .paper-tape::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+
+    body.dark .paper-tape::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.1);
+      border: 2px solid rgba(0,0,0,0.3);
+    }
+
+    body.dark .paper-tape::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.6) 100%);
+      border: 2px solid rgba(0,0,0,0.2);
+    }
+
+    body.dark .paper-tape::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.8) 100%);
+      border: 2px solid rgba(0,0,0,0.1);
+    }
+
+    body.dark .paper-tape::-webkit-scrollbar-thumb:active {
+      background: linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.9) 100%);
+      border: 2px solid rgba(0,0,0,0.05);
+    }
+
+    /* Scroll indicator when content is scrollable - Fixed positioning */
+    .paper-tape.scrollable::after {
+      content: '↕';
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      font-size: 8px;
+      color: rgba(0,0,0,0.4);
+      background: transparent;
+      padding: 0;
+      border-radius: 0;
+      z-index: 20;
+      pointer-events: none;
+      font-weight: bold;
+      letter-spacing: 0;
+      border: none;
+      box-shadow: none;
+      width: 10px;
+      height: 10px;
+      text-align: center;
+      line-height: 10px;
+    }
+
+    body.dark .paper-tape.scrollable::after {
+      color: rgba(255,255,255,0.4);
+      background: transparent;
+    }
+
+    @keyframes entrySlideIn {
+      0% {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Paper strip for new entries animation */
+    .paper-strip {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 2.25in; /* Match tape width */
+      background: linear-gradient(to right, 
+        #ffffff 0%, 
+        #ffffff 5%, 
+        #fefefe 10%,
+        #ffffff 15%,
+        #fefefe 20%,
+        #ffffff 25%,
+        #fefefe 30%,
+        #ffffff 35%,
+        #fefefe 40%,
+        #ffffff 45%,
+        #fefefe 50%,
+        #ffffff 55%,
+        #fefefe 60%,
+        #ffffff 65%,
+        #fefefe 70%,
+        #ffffff 75%,
+        #fefefe 80%,
+        #ffffff 85%,
+        #fefefe 90%,
+        #ffffff 95%,
+        #ffffff 100%);
+      border-left: 1px solid #e8e8e8;
+      border-right: 1px solid #e8e8e8;
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      text-align: right;
+      padding: 2px 12px 2px 16px;
+      box-shadow: 
+        -1px 0 3px rgba(0,0,0,0.1),
+        1px 0 3px rgba(0,0,0,0.1),
+        0 2px 4px rgba(0,0,0,0.15);
+      opacity: 0;
+      height: 16px;
+      line-height: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      color: #1a1a1a;
+      z-index: 3;
+      font-weight: 500;
+      text-shadow: 0 0 0.5px rgba(26,26,26,0.8);
+    }
+
+    /* Add perforations to animated strip */
+    .paper-strip::before {
+      content: '';
+      position: absolute;
+      left: -1px;
+      top: 0;
+      bottom: 0;
+      width: 8px;
+      background-image: radial-gradient(circle at 4px 8px, transparent 1px, #ffffff 1px);
+      background-size: 8px 16px;
+      background-repeat: repeat-y;
+    }
+
+    .paper-strip::after {
+      content: '';
+      position: absolute;
+      right: -1px;
+      top: 0;
+      bottom: 0;
+      width: 8px;
+      background-image: radial-gradient(circle at 4px 8px, transparent 1px, #ffffff 1px);
+      background-size: 8px 16px;
+      background-repeat: repeat-y;
+    }
+
+    body.dark .paper-strip {
+      background: linear-gradient(to right, 
+        #f0f0f0 0%, 
+        #f0f0f0 5%, 
+        #eeeeee 10%,
+        #f0f0f0 15%,
+        #eeeeee 20%,
+        #f0f0f0 25%,
+        #eeeeee 30%,
+        #f0f0f0 35%,
+        #eeeeee 40%,
+        #f0f0f0 45%,
+        #eeeeee 50%,
+        #f0f0f0 55%,
+        #eeeeee 60%,
+        #f0f0f0 65%,
+        #eeeeee 70%,
+        #f0f0f0 75%,
+        #eeeeee 80%,
+        #f0f0f0 85%,
+        #eeeeee 90%,
+        #f0f0f0 95%,
+        #f0f0f0 100%);
+      border-left: 1px solid #cccccc;
+      border-right: 1px solid #cccccc;
+      color: #222222;
+    }
+
+    body.dark .paper-strip.manual-entry {
+      color: #1a1a1a;
+      text-shadow: 0 0 0.5px rgba(26,26,26,0.8);
+    }
+
+    /* Manual entries in paper strip animation are left-aligned and black */
+    .paper-strip.manual-entry {
+      text-align: left;
+      padding: 2px 16px 2px 12px;
+      font-weight: 800;
+      color: #1a1a1a;
+      text-shadow: 0 0 0.5px rgba(26,26,26,0.8);
+    }
+
+    /* Red text entries (like subtraction) stay right-aligned but are red */
+    .paper-strip.red-text {
+      color: #dc2626;
+      text-shadow: 0 0 0.5px rgba(220,38,38,0.8);
+      font-weight: 600;
+    }
+
+    /* Paper roll animation */
+    @keyframes paperRollOut {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) translateY(0px) scaleY(0.1) rotateX(15deg);
+      }
+      15% {
+        opacity: 1;
+        transform: translate(-50%, -50%) translateY(-2px) scaleY(1) rotateX(0deg);
+      }
+      25% {
+        opacity: 1;
+        transform: translate(-50%, -50%) translateY(0px) scaleY(1) rotateX(0deg);
+      }
+      75% {
+        opacity: 1;
+        transform: translate(-50%, -50%) translateY(8px) scaleY(1) rotateX(-2deg);
+      }
+      90% {
+        opacity: 0.7;
+        transform: translate(-50%, -50%) translateY(15px) scaleY(0.95) rotateX(-5deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) translateY(25px) scaleY(0.8) rotateX(-10deg);
+      }
+    }
+
+    .paper-strip.animate {
+      animation: paperRollOut 1s ease-out forwards;
+    }
+
+    /* Printer mechanism visual */
+    .printer-mechanism {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      width: 20px;
+      height: 20px;
+      background: radial-gradient(circle, #666666 0%, #333333 100%);
+      border-radius: 50%;
+      box-shadow: 
+        0 2px 4px rgba(0,0,0,0.3),
+        inset 0 1px 0 rgba(255,255,255,0.2);
+    }
+
+    .printer-mechanism::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 8px;
+      height: 8px;
+      background: #222222;
+      border-radius: 50%;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.8);
+    }
+
+    .printer-mechanism.active {
+      animation: printerSpin 0.5s linear infinite;
+    }
+
+    @keyframes printerSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .top-controls {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+      gap: 8px;
+    }
+
+    .top-controls button {
+      flex: 1;
+      font-size: 11px;
+      padding: 8px 4px;
+      border: 2px outset #d1d5db;
+      background: linear-gradient(145deg, #f3f4f6 0%, #e5e7eb 50%, #d1d5db 100%);
+      color: #374151;
+      cursor: pointer;
+      border-radius: 6px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.1s ease;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.7);
+      box-shadow: 
+        0 3px 6px rgba(0,0,0,0.15),
+        inset 0 1px 0 rgba(255,255,255,0.8),
+        inset 0 -1px 0 rgba(0,0,0,0.1),
+        inset 1px 0 0 rgba(255,255,255,0.4),
+        inset -1px 0 0 rgba(0,0,0,0.1);
+    }
+
+    .top-controls button:active {
+      border: 2px inset #d1d5db;
+      background: linear-gradient(145deg, #9ca3af 0%, #d1d5db 50%, #e5e7eb 100%);
+      transform: translateY(1px);
+      box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.3),
+        inset 0 -1px 0 rgba(255,255,255,0.1),
+        inset 1px 0 0 rgba(0,0,0,0.2),
+        inset -1px 0 0 rgba(255,255,255,0.1),
+        0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .display {
+      font-family: 'Orbitron', monospace;
+      font-size: 36px;
+      font-weight: 700;
+      text-align: right;
+      background: linear-gradient(145deg, #0a0a0a 0%, #1a1a1a 100%);
+      color: #10b981;
+      padding: 20px 25px;
+      border: 3px inset #4a5568;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      letter-spacing: 3px;
+      box-shadow: 
+        inset 0 4px 15px rgba(0,0,0,0.9),
+        0 2px 10px rgba(0,0,0,0.5);
+      text-shadow: 0 1px 2px rgba(16, 185, 129, 0.5);
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .button-row {
+      grid-column: span 4;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .button-row button {
+      flex: 1;
+      max-width: 70px;
+    }
+
+    button {
+      font-size: 18px;
+      font-weight: bold;
+      padding: 15px 8px;
+      border: 3px outset #6b7280;
+      background: linear-gradient(145deg, #d1d5db 0%, #9ca3af 50%, #6b7280 100%);
+      color: #1f2937;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.1s ease;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+      box-shadow: 
+        0 6px 12px rgba(0,0,0,0.3),
+        inset 0 2px 0 rgba(255,255,255,0.6),
+        inset 0 -2px 0 rgba(0,0,0,0.2),
+        inset 2px 0 0 rgba(255,255,255,0.3),
+        inset -2px 0 0 rgba(0,0,0,0.15);
+      position: relative;
+      overflow: hidden;
+    }
+
+    body.dark button {
+      background: linear-gradient(145deg, #2d3748 0%, #1a202c 50%, #0a0a0a 100%);
+      border: 3px outset #4a5568;
+      color: #e2e8f0;
+      text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+      box-shadow: 
+        0 6px 12px rgba(0,0,0,0.6),
+        inset 0 2px 0 rgba(255, 255, 255, 0.1),
+        inset 0 -2px 0 rgba(0,0,0,0.6),
+        inset 2px 0 0 rgba(255, 255, 255, 0.05),
+        inset -2px 0 0 rgba(0,0,0,0.4);
+    }
+
+    button:hover {
+      background: linear-gradient(145deg, #e5e7eb 0%, #d1d5db 50%, #9ca3af 100%);
+      transform: translateY(-2px);
+      box-shadow: 
+        0 8px 16px rgba(0,0,0,0.4),
+        inset 0 2px 0 rgba(255,255,255,0.8),
+        inset 0 -2px 0 rgba(0,0,0,0.3),
+        inset 2px 0 0 rgba(255,255,255,0.4),
+        inset -2px 0 0 rgba(0,0,0,0.2);
+    }
+
+    button:active {
+      border: 3px inset #6b7280;
+      background: linear-gradient(145deg, #6b7280 0%, #9ca3af 50%, #d1d5db 100%);
+      transform: translateY(2px);
+      box-shadow: 
+        inset 0 4px 8px rgba(0,0,0,0.4),
+        inset 0 -1px 0 rgba(255,255,255,0.1),
+        inset 2px 0 0 rgba(0,0,0,0.3),
+        inset -2px 0 0 rgba(255,255,255,0.1),
+        0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    /* Special button styling */
+    .function-button {
+      background: linear-gradient(145deg, #38b2ac 0%, #2d7d74 50%, #1a5650 100%);
+      color: #e2e8f0;
+      border-color: #2d7d74;
+      text-shadow: 0 1px 0 rgba(0,0,0,0.8);
+      box-shadow: 
+        0 6px 12px rgba(0,0,0,0.4),
+        inset 0 2px 0 rgba(56, 178, 172, 0.3),
+        inset 0 -2px 0 rgba(0,0,0,0.4),
+        inset 2px 0 0 rgba(56, 178, 172, 0.2),
+        inset -2px 0 0 rgba(0,0,0,0.3),
+        0 0 8px rgba(56, 178, 172, 0.3);
+    }
+
+    .function-button:hover {
+      background: linear-gradient(145deg, #fcd34d 0%, #fbbf24 50%, #f59e0b 100%);
+      transform: translateY(-2px);
+      box-shadow: 
+        0 8px 16px rgba(0,0,0,0.4),
+        inset 0 2px 0 rgba(255,255,255,0.7),
+        inset 0 -2px 0 rgba(0,0,0,0.3),
+        inset 2px 0 0 rgba(255,255,255,0.4),
+        inset -2px 0 0 rgba(0,0,0,0.2);
+    }
+
+    .function-button:active {
+      background: linear-gradient(145deg, #d97706 0%, #f59e0b 50%, #fbbf24 100%);
+      border: 3px inset #d97706;
+      transform: translateY(2px);
+      box-shadow: 
+        inset 0 4px 8px rgba(0,0,0,0.4),
+        inset 0 -1px 0 rgba(255,255,255,0.1),
+        inset 2px 0 0 rgba(0,0,0,0.3),
+        inset -2px 0 0 rgba(255,255,255,0.1),
+        0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .operator-button {
+      background: linear-gradient(145deg, #9f1239 0%, #7f1d1d 50%, #450a0a 100%);
+      color: #fecaca;
+      border-color: #7f1d1d;
+      text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+      box-shadow: 
+        0 6px 12px rgba(0,0,0,0.5),
+        inset 0 2px 0 rgba(248, 113, 113, 0.3),
+        inset 0 -2px 0 rgba(0,0,0,0.5),
+        inset 2px 0 0 rgba(248, 113, 113, 0.2),
+        inset -2px 0 0 rgba(0,0,0,0.4),
+        0 0 8px rgba(248, 113, 113, 0.3);
+    }
+
+    .operator-button:hover {
+      background: linear-gradient(145deg, #fca5a5 0%, #f87171 50%, #ef4444 100%);
+      transform: translateY(-2px);
+      box-shadow: 
+        0 8px 16px rgba(0,0,0,0.4),
+        inset 0 2px 0 rgba(255,255,255,0.4),
+        inset 0 -2px 0 rgba(0,0,0,0.4),
+        inset 2px 0 0 rgba(255,255,255,0.3),
+        inset -2px 0 0 rgba(0,0,0,0.3);
+    }
+
+    .operator-button:active {
+      background: linear-gradient(145deg, #dc2626 0%, #ef4444 50%, #f87171 100%);
+      border: 3px inset #dc2626;
+      transform: translateY(2px);
+      box-shadow: 
+        inset 0 4px 8px rgba(0,0,0,0.4),
+        inset 0 -1px 0 rgba(255,255,255,0.1),
+        inset 2px 0 0 rgba(0,0,0,0.3),
+        inset -2px 0 0 rgba(255,255,255,0.1),
+        0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .toggle-on {
+      background: linear-gradient(145deg, #10b981 0%, #059669 100%) !important;
+      color: #ffffff !important;
+      border-color: #059669 !important;
+      box-shadow: 
+        0 0 15px rgba(16, 185, 129, 0.5),
+        inset 0 1px 0 rgba(255,255,255,0.3) !important;
+    }
+
+    /* Print Slider Styling */
+    .print-slider-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(145deg, #9ca3af 0%, #6b7280 100%);
+      border: 3px outset #6b7280;
+      border-radius: 8px;
+      padding: 8px 12px;
+      min-height: 55px;
+      position: relative;
+    }
+
+    body.dark .print-slider-container {
+      background: linear-gradient(145deg, #555555 0%, #404040 100%);
+      border: 3px outset #404040;
+    }
+
+    .print-slider-container label {
+      font-size: 10px;
+      font-weight: bold;
+      color: #ffffff;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    body.dark .print-slider-container label {
+      color: #e0e0e0;
+    }
+
+    .print-slider {
+      width: 50px;
+      height: 4px;
+      background: linear-gradient(145deg, #4a4a4a 0%, #2d2d2d 100%);
+      border: 1px inset #4a4a4a;
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .print-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 12px;
+      height: 16px;
+      background: linear-gradient(145deg, #e5e7eb 0%, #9ca3af 100%);
+      border: 2px outset #9ca3af;
+      border-radius: 3px;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .print-slider::-webkit-slider-thumb:active {
+      background: linear-gradient(145deg, #9ca3af 0%, #6b7280 100%);
+      border: 2px inset #6b7280;
+    }
+
+    .print-slider::-moz-range-thumb {
+      width: 12px;
+      height: 16px;
+      background: linear-gradient(145deg, #e5e7eb 0%, #9ca3af 100%);
+      border: 2px outset #9ca3af;
+      border-radius: 3px;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .print-slider::-moz-range-thumb:active {
+      background: linear-gradient(145deg, #9ca3af 0%, #6b7280 100%);
+      border: 2px inset #6b7280;
+    }
+
+    /* Print slider active state */
+    .print-slider.active {
+      background: linear-gradient(145deg, #10b981 0%, #059669 100%);
+      box-shadow: 
+        0 0 10px rgba(16, 185, 129, 0.5),
+        inset 0 1px 0 rgba(255,255,255,0.2);
+    }
+
+
+
+    .tokens-sidebar h3 {
+      margin: 0 0 15px 0;
+      font-size: 16px;
+      color: #374151;
+      border-bottom: 1px solid #d1d5db;
+      padding-bottom: 8px;
+    }
+
+    body.dark .tokens-sidebar h3 {
+      color: #e0e0e0;
+      border-bottom: 1px solid #555555;
+    }
+
+    .token-list {
+      max-height: 350px;
+      overflow-y: auto;
+      font-size: 12px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .token-list::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .token-list::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    body.dark .token-list::-webkit-scrollbar-track {
+      background: #2a2a2a;
+    }
+
+    .token-list::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 4px;
+    }
+
+    .token-item {
+      border-top: 1px dashed #9ca3af;
+      padding: 8px 0;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .token-item:hover {
+      background-color: rgba(59, 130, 246, 0.1);
+    }
+
+    .token-item:first-child {
+      border-top: none;
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+      .main-container {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .tokens-sidebar {
+        width: 100%;
+        max-width: 420px;
+        margin-bottom: 20px;
+      }
+
+      .tokens-sidebar.show {
+        display: block;
+      }
+
+      /* Ensure scrolling works on mobile */
+      .paper-tape {
+        -webkit-overflow-scrolling: touch !important;
+        overflow-y: scroll !important;
+        touch-action: pan-y !important;
+        overscroll-behavior: none !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .calculator {
+        max-width: 100%;
+        padding: 20px;
+      }
+
+      .display {
+        font-size: 24px;
+        padding: 12px 15px;
+      }
+
+      button {
+        font-size: 16px;
+        padding: 12px 6px;
+      }
+
+      .buttons {
+        gap: 8px;
+      }
+
+      .button-row {
+        gap: 8px;
+      }
+
+      .tokens-sidebar {
+        width: 100%;
+        min-height: 200px;
+      }
+    }
+
+    /* Add subtle animations */
+    @keyframes powerOn {
+      0% { opacity: 0; transform: scale(0.9); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .calculator {
+      animation: powerOn 0.5s ease-out;
+    }
+
+    /* Dark mode toggle button */
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(145deg, #f59e0b 0%, #d97706 100%);
+      border: 2px outset #d97706;
+      color: white;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      z-index: 1000;
+    }
+
+    .theme-toggle:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+    }
+
+    .theme-toggle:active {
+      transform: scale(0.95);
+    }
+
+    body.dark .theme-toggle {
+      background: linear-gradient(145deg, #4a5568 0%, #2d3748 100%);
+      border: 2px outset #2d3748;
+    }
+
+    /* Decimal places slider */
+    .decimal-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 15px 0;
+      padding: 10px;
+      background: linear-gradient(145deg, #f3f4f6 0%, #e5e7eb 100%);
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    body.dark .decimal-control {
+      background: linear-gradient(145deg, #374151 0%, #2d3748 100%);
+      border: 1px solid #555555;
+      color: #e0e0e0;
+    }
+
+    .decimal-control label {
+      font-weight: bold;
+      min-width: 80px;
+    }
+
+    .decimal-slider {
+      flex: 1;
+      height: 6px;
+      background: #d1d5db;
+      outline: none;
+      border-radius: 3px;
+      -webkit-appearance: none;
+    }
+
+    .decimal-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      background: #059669;
+      cursor: pointer;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .decimal-slider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: #059669;
+      cursor: pointer;
+      border-radius: 50%;
+      border: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    body.dark .decimal-slider {
+      background: #555555;
+    }
+
+    .decimal-value {
+      font-weight: bold;
+      min-width: 20px;
+      text-align: center;
+      padding: 4px 8px;
+      background: #059669;
+      color: white;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body class="dark">
+
+  
+  <div class="main-container">
+    <div class="tokens-sidebar" id="tokensSidebar">
+      <h3>Saved Tokens</h3>
+      <div class="token-list" id="tokenList"></div>
+    </div>
+    <div class="calculator">
+      <div class="paper-roll-container" id="paperRollContainer">
+        <div class="paper-slot"></div>
+        <div class="printer-mechanism" id="printerMechanism"></div>
+        <div class="paper-tape" id="paperTape" onclick="enableTapeScrolling()" onmousedown="enableTapeScrolling()" ontouchstart="enableTapeScrolling()" tabindex="0"></div>
+      </div>
+      <div class="top-controls">
+        <button onclick="press('Tear')">Tear</button>
+        <button onclick="press('Reprint')">Reprint</button>
+        <button onclick="toggleTokenCheck()">Check</button>
+        <button onclick="press('Back')">⌫</button>
+      </div>
+      <div id="display" class="display">0</div>
+      <div class="buttons">
+        <div class="button-row">
+          <button class="function-button" onclick="press('CA')">CA</button>
+          <button class="function-button" onclick="press('#')">#</button>
+          <button class="function-button" onclick="press('Feed')">Feed</button>
+          <div class="print-slider-container">
+            <label for="printSlider">Print</label>
+            <input type="range" id="printSlider" class="print-slider" min="0" max="1" value="0" onchange="togglePrint(this.value)">
+          </div>
+          <button class="function-button" onclick="press('%')">%</button>
+        </div>
+        <button onclick="press('7')">7</button>
+        <button onclick="press('8')">8</button>
+        <button onclick="press('9')">9</button>
+        <button class="operator-button" onclick="press('/')">÷</button>
+        <button onclick="press('4')">4</button>
+        <button onclick="press('5')">5</button>
+        <button onclick="press('6')">6</button>
+        <button class="operator-button" onclick="press('*')">×</button>
+        <button onclick="press('1')">1</button>
+        <button onclick="press('2')">2</button>
+        <button onclick="press('3')">3</button>
+        <button class="operator-button" onclick="press('-')">−</button>
+        <button onclick="press('0')">0</button>
+        <button onclick="press('00')">00</button>
+        <button onclick="press('.')">.</button>
+        <button class="operator-button" onclick="press('+')">+</button>
+      </div>
+      <div class="decimal-control">
+        <label for="decimalSlider">Decimal Places:</label>
+        <input type="range" id="decimalSlider" class="decimal-slider" min="0" max="4" value="2" oninput="updateDecimalPlaces(this.value)">
+        <span class="decimal-value" id="decimalValue">2</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let current = '';
+    let total = 0;
+    let lastValue = 0;
+    let lastOp = null;
+    let tape = [];
+    let grandTotal = 0;
+    let repeatValue = null;
+    let isMulDiv = false;
+    let printMode = false;
+    let memory = [];
+    let tearTokens = [];
+    let decimalPlaces = 2; // Default decimal places
+    let paperTapeEntries = []; // Track all paper tape entries
+    let isEnteringManualInput = false; // Track if user is entering manual input
+
+    function formatNumber(num) {
+      if (num === 0) return '0';
+
+      // Convert to number and format with fixed decimal places
+      const numValue = typeof num === 'string' ? parseFloat(num) : num;
+      if (isNaN(numValue)) return '0';
+
+      // Format with specified decimal places
+      let formatted = numValue.toFixed(decimalPlaces);
+
+      // Remove trailing zeros if decimal places is 0
+      if (decimalPlaces === 0) {
+        formatted = Math.round(numValue).toString();
+      }
+
+      // Ensure maximum 12 digits total (including decimal point)
+      if (formatted.length > 12) {
+        // Try scientific notation for very large numbers
+        const scientific = numValue.toExponential(decimalPlaces);
+        if (scientific.length <= 12) {
+          formatted = scientific;
+        } else {
+          // Truncate to fit 12 digits
+          formatted = formatted.substring(0, 12);
+        }
+      }
+
+      return formatted;
+    }
+
+    function updateDisplay(val = '') {
+      let displayValue = val || '0';
+
+      // Format numbers but not operators
+      if (val && !isNaN(val) && val !== '' && !['+', '-', '*', '/', '×', '÷', '−'].includes(val)) {
+        displayValue = formatNumber(val);
+      }
+
+      document.getElementById('display').textContent = displayValue;
+    }
+
+    function updateDecimalPlaces(value) {
+      decimalPlaces = parseInt(value);
+      document.getElementById('decimalValue').textContent = value;
+
+      // Update current display with new decimal places
+      const currentDisplay = document.getElementById('display').textContent;
+      if (currentDisplay !== '0' && !isNaN(currentDisplay) && !['+', '-', '*', '/', '×', '÷', '−'].includes(currentDisplay)) {
+        updateDisplay(currentDisplay);
+      }
+    }
+
+    function animatePaperRoll(text, isLeftAligned = false, isRedText = false) {
+      const container = document.getElementById('paperRollContainer');
+      const mechanism = document.getElementById('printerMechanism');
+      const paperTape = document.getElementById('paperTape');
+
+      // Create paper strip for animation
+      const paperStrip = document.createElement('div');
+      paperStrip.className = 'paper-strip';
+      if (isLeftAligned) {
+        paperStrip.classList.add('manual-entry');
+      }
+      if (isRedText) {
+        paperStrip.classList.add('red-text');
+      }
+      paperStrip.textContent = text;
+
+      // Add to container
+      container.appendChild(paperStrip);
+
+      // Start printer mechanism animation
+      mechanism.classList.add('active');
+
+      // Start paper roll animation
+      setTimeout(() => {
+        paperStrip.classList.add('animate');
+      }, 100);
+
+      // Add entry to permanent tape after animation starts
+      setTimeout(() => {
+        addToPaperTape(text, isLeftAligned, isRedText);
+      }, 300);
+
+      // Stop printer mechanism and remove paper strip after animation
+      setTimeout(() => {
+        mechanism.classList.remove('active');
+        if (paperStrip.parentNode) {
+          paperStrip.parentNode.removeChild(paperStrip);
+        }
+      }, 1000);
+    }
+
+    function addToPaperTape(text, isLeftAligned = false, isRedText = false) {
+      const paperTape = document.getElementById('paperTape');
+
+      // Add to entries array
+      paperTapeEntries.push(text);
+
+      // Create new entry element
+      const entry = document.createElement('div');
+      entry.className = 'paper-entry';
+      if (isLeftAligned) {
+        entry.classList.add('manual-entry');
+      }
+      if (isRedText) {
+        entry.classList.add('red-text');
+      }
+      entry.textContent = text;
+
+      // Add entry to tape (at the bottom for downward growth like real adding machine)
+      paperTape.appendChild(entry);
+
+      // Show tape if this is the first entry
+      if (paperTapeEntries.length === 1) {
+        paperTape.classList.add('visible');
+        // Add visual connection to the slot
+        const container = document.getElementById('paperRollContainer');
+        container.classList.add('has-tape');
+      }
+
+      // Auto-enable scrolling after 8 entries or when content overflows
+      if (paperTapeEntries.length >= 8) {
+        paperTape.classList.add('scrollable');
+      }
+
+      // Update scroll indicator based on content
+      updateScrollIndicator();
+
+      // Auto-scroll to bottom to show latest entries
+      setTimeout(() => {
+        paperTape.scrollTop = paperTape.scrollHeight;
+      }, 10);
+    }
+
+    function clearPaperTape() {
+      const paperTape = document.getElementById('paperTape');
+      const container = document.getElementById('paperRollContainer');
+      paperTape.innerHTML = '';
+      paperTape.classList.remove('visible');
+      paperTape.classList.remove('scrollable');
+      container.classList.remove('has-tape');
+      paperTapeEntries = [];
+    }
+
+    function updateScrollIndicator() {
+      const paperTape = document.getElementById('paperTape');
+      if (paperTape) {
+        // Check if content is scrollable OR if we have 8+ entries (mobile friendly)
+        const isScrollable = paperTape.scrollHeight > paperTape.clientHeight;
+        const hasEnoughEntries = paperTapeEntries.length >= 8;
+        
+        if (isScrollable || hasEnoughEntries) {
+          paperTape.classList.add('scrollable');
+        } else {
+          paperTape.classList.remove('scrollable');
+        }
+      }
+    }
+
+    function enableTapeScrolling() {
+      const paperTape = document.getElementById('paperTape');
+      if (paperTapeEntries.length > 0) {
+        // Force enable scrolling when clicked (even with few entries)
+        paperTape.classList.add('scrollable');
+        
+        // Ensure tape is visible and interactive
+        paperTape.classList.add('visible');
+        
+        // Set minimum height to allow scrolling even with few entries
+        paperTape.style.maxHeight = '150px';
+        
+        // Update scroll indicator after forcing scrollable state
+        setTimeout(() => {
+          updateScrollIndicator();
+        }, 50);
+        
+        // Focus on the tape for keyboard scrolling
+        paperTape.focus();
+        
+        // Auto-scroll to bottom to show latest entries
+        setTimeout(() => {
+          paperTape.scrollTop = paperTape.scrollHeight;
+        }, 100);
+      }
+    }
+
+    function updateTokenList() {
+      const list = document.getElementById('tokenList');
+      list.innerHTML = tearTokens.map((t, i) => `<div class="token-item" onclick="loadToken(${i})"><strong>Token ${i + 1}:</strong><br>${t.join('<br>')}</div>`).join('');
+
+      // Auto-show tokens sidebar when there are tokens
+      const sidebar = document.getElementById('tokensSidebar');
+      if (tearTokens.length > 0) {
+        sidebar.classList.add('show');
+      }
+    }
+
+    function togglePrint() {
+      printMode = !printMode;
+      const btn = document.getElementById('printToggle');
+      btn.classList.toggle('toggle-on', printMode);
+
+      // Reset calculator when Print button is pressed
+      if (printMode) {
+        // Reset ALL calculation variables without printing
+        current = '';
+        total = 0;
+        lastValue = 0;
+        lastOp = null;
+        repeatValue = null;
+        isMulDiv = false;
+        memory = [];
+        grandTotal = 0;
+        isEnteringManualInput = false;
+
+        // Clear paper tape
+        clearPaperTape();
+
+        // Force display to show 0
+        document.getElementById('display').textContent = '0';
+      }
+    }
+
+    function toggleTokenCheck() {
+      // This function is called by the Check button - toggle the sidebar visibility
+      const sidebar = document.getElementById('tokensSidebar');
+      sidebar.classList.toggle('show');
+    }
+
+    function loadToken(index) {
+      tape = [...tearTokens[index]];
+      updateDisplay();
+    }
+
+    function press(key) {
+      // Add button press animation
+      const activeButtons = document.querySelectorAll('button:active');
+      activeButtons.forEach(btn => {
+        btn.style.transform = 'translateY(1px)';
+        setTimeout(() => {
+          btn.style.transform = '';
+        }, 100);
+      });
+
+      if (key === 'CA') {
+        current = '';
+        total = 0;
+        lastOp = null;
+        lastValue = 0;
+        repeatValue = null;
+        isMulDiv = false;
+        memory = [];
+        isEnteringManualInput = false; // Reset manual input flag
+        updateDisplay();
+        return;
+      }
+      if (key === 'Back') {
+        current = current.slice(0, -1);
+        updateDisplay(current);
+        return;
+      }
+      if (key === 'Feed') {
+        const entry = '----------------';
+        tape.push(entry);
+        animatePaperRoll(entry);
+        return;
+      }
+      if (key === 'Tear') {
+        if (tape.length > 0) {
+          tearTokens.push([...tape]);
+          tape = []; // Clear the tape preview
+          updateTokenList();
+          animatePaperRoll('[Tear]');
+          // Clear the paper tape after tearing
+          setTimeout(() => {
+            clearPaperTape();
+          }, 1500);
+        }
+        return;
+      }
+      if (key === 'Reprint') {
+        if (tearTokens.length > 0 && printMode) {
+          animatePaperRoll('[Reprint]');
+          tearTokens[tearTokens.length - 1].forEach(line => {
+            tape.push(line);
+            setTimeout(() => animatePaperRoll(line), 500);
+          });
+        }
+        return;
+      }
+      if (key === '#') {
+        const displayValue = document.getElementById('display').textContent;
+        const entry = displayValue;
+        tape.push(entry);
+        
+        // Check if user is entering manual input vs displaying calculation result
+        if (isEnteringManualInput) {
+          // Manual entry: print left-aligned and black
+          animatePaperRoll(entry, true, false);
+        } else {
+          // Calculation result: print right-aligned and black
+          animatePaperRoll(entry, false, false);
+        }
+        return;
+      }
+      if (key === '%') {
+        if (current && !isNaN(current)) {
+          let percent = parseFloat(current);
+          if (lastValue !== 0 && lastOp === '*') {
+            current = ((lastValue * percent) / 100).toString();
+          } else {
+            current = (percent / 100).toString();
+          }
+          updateDisplay(current);
+        }
+        return;
+      }
+      if (!isNaN(key) || key === '.' || key === '00') {
+        current += key;
+        isEnteringManualInput = true; // User is entering manual input
+        updateDisplay(current);
+        return;
+      }
+      if (["+", "-"].includes(key)) {
+        let num;
+        if (isMulDiv) {
+          num = current ? parseFloat(current) : repeatValue ?? lastValue;
+          if (lastOp === '*') total = lastValue * num;
+          else if (lastOp === '/') total = lastValue / num;
+          if (printMode) {
+            const entry = lastOp + formatNumber(num) + ' = ' + formatNumber(total);
+            memory.push(entry);
+            tape.push(entry);
+            animatePaperRoll(entry);
+          }
+          current = '';
+          lastValue = total;
+          repeatValue = num;
+          isMulDiv = false;
+          isEnteringManualInput = false; // Reset manual input flag after operation
+        } else {
+          num = current ? parseFloat(current) : repeatValue ?? lastValue;
+          if (total === 0 && lastOp === null) {
+            // First operation after reset - use the number as starting total
+            total = num;
+          } else {
+            if (key === '+') total += num;
+            else total -= num;
+          }
+          repeatValue = num;
+          lastValue = num;
+        }
+        if (printMode) {
+          const entry = formatNumber(num) + key;
+          memory.push(entry);
+          tape.push(entry);
+          // Subtraction operations print in red but stay right-aligned
+          const isSubtraction = key === '-';
+          animatePaperRoll(entry, false, isSubtraction);
+        }
+        updateDisplay(total);
+        current = '';
+        lastOp = key;
+        isEnteringManualInput = false; // Reset manual input flag after operation
+        return;
+      }
+      if (["*", "/"].includes(key)) {
+        if (current) {
+          lastValue = parseFloat(current);
+          current = '';
+        }
+        if (lastOp === '+' || lastOp === '-') {
+          repeatValue = repeatValue ?? lastValue;
+          lastValue = total;
+          total = 0;
+        }
+        lastOp = key;
+        isMulDiv = true;
+        isEnteringManualInput = false; // Reset manual input flag after operation
+        updateDisplay(key);
+        return;
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      const k = e.key;
+      if (!isNaN(k) || ['+', '-', '*', '/', '.', '#', '%'].includes(k)) {
+        e.preventDefault();
+        press(k);
+      }
+      if (k === 'Backspace') press('Back');
+      if (k.toLowerCase() === 'c') press('CA');
+      if (k === 'Enter') press('+');
+    });
+
+    // Initialize dark theme (always on)
+    function initializeTheme() {
+      // Dark theme is always active - no initialization needed
+    }
+
+    // Initialize paper tape scrolling functionality
+    function initializePaperTape() {
+      const paperTape = document.getElementById('paperTape');
+      if (paperTape) {
+        // Add scroll event listener to update scroll indicator
+        paperTape.addEventListener('scroll', () => {
+          updateScrollIndicator();
+        });
+
+        // Add keyboard navigation support
+        paperTape.addEventListener('keydown', (e) => {
+          if (paperTapeEntries.length > 0) {
+            switch(e.key) {
+              case 'ArrowUp':
+                e.preventDefault();
+                paperTape.scrollTop -= 20;
+                break;
+              case 'ArrowDown':
+                e.preventDefault();
+                paperTape.scrollTop += 20;
+                break;
+              case 'Home':
+                e.preventDefault();
+                paperTape.scrollTop = 0;
+                break;
+              case 'End':
+                e.preventDefault();
+                paperTape.scrollTop = paperTape.scrollHeight;
+                break;
+              case 'PageUp':
+                e.preventDefault();
+                paperTape.scrollTop -= paperTape.clientHeight * 0.8;
+                break;
+              case 'PageDown':
+                e.preventDefault();
+                paperTape.scrollTop += paperTape.clientHeight * 0.8;
+                break;
+            }
+          }
+        });
+
+        // Add resize observer to update scroll indicator when tape content changes
+        if (window.ResizeObserver) {
+          const resizeObserver = new ResizeObserver(() => {
+            updateScrollIndicator();
+          });
+          resizeObserver.observe(paperTape);
+        }
+      }
+    }
+
+    // Print toggle functionality for slider control
+    function togglePrint(value) {
+      const slider = document.getElementById('printSlider');
+      const wasPrintMode = printMode;
+      printMode = value == 1;
+      
+      if (printMode) {
+        slider.classList.add('active');
+        
+        // Reset calculator when print mode is turned on
+        if (!wasPrintMode) {
+          // Reset ALL calculation variables without printing
+          current = '';
+          total = 0;
+          lastValue = 0;
+          lastOp = null;
+          repeatValue = null;
+          isMulDiv = false;
+          memory = [];
+          grandTotal = 0;
+          isEnteringManualInput = false;
+
+          // Clear paper tape
+          clearPaperTape();
+
+          // Force display to show 0
+          document.getElementById('display').textContent = '0';
+        }
+      } else {
+        slider.classList.remove('active');
+        
+        // Reset calculator when print mode is turned off
+        if (wasPrintMode) {
+          // Reset ALL calculation variables without printing
+          current = '';
+          total = 0;
+          lastValue = 0;
+          lastOp = null;
+          repeatValue = null;
+          isMulDiv = false;
+          memory = [];
+          grandTotal = 0;
+          isEnteringManualInput = false;
+
+          // Clear paper tape
+          clearPaperTape();
+
+          // Force display to show 0
+          document.getElementById('display').textContent = '0';
+        }
+      }
+    }
+
+    // Initialize calculator
+    updateDisplay();
+    initializeTheme();
+    initializePaperTape();
+  </script>
+</body>
+</html>
