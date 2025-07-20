@@ -789,7 +789,7 @@
             timestamp: new Date().toISOString()
           });
 
-          request.onsuccess = () => resolve(request.result);
+          request.onsuccess = () => () => resolve(request.result);
           request.onerror = () => reject(request.error);
         });
       }
@@ -1396,7 +1396,6 @@
 
       updateDisplay();
       initializeTheme();
-      initializePaperTape();
     }
 
     // Start the calculator when page loads
