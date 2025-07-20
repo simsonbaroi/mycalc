@@ -1265,6 +1265,7 @@
         <button onclick="press('Tear')">Tear</button>
         <button onclick="press('Reprint')">Reprint</button>
         <button onclick="toggleTokenCheck()">Check</button>
+        <button onclick="resetAll()" style="background: linear-gradient(145deg, #dc2626 0%, #991b1b 100%); color: white;">Reset All</button>
         <button onclick="press('Back')">⌫</button>
       </div>
       <div id="display" class="display">0</div>
@@ -1679,6 +1680,65 @@
     function loadToken(index) {
       tape = [...tearTokens[index]];
       updateDisplay();
+    }
+
+    async function resetAll() {
+      try {
+        // Clear all tokens from database
+        await storage.clearAllTokens();
+        
+        // Reset all calculator variables
+        current = '';
+        total = 0;
+        lastValue = 0;
+        lastOp = null;
+        repeatValue = null;
+        isMulDiv = false;
+        memory = [];
+        grandTotal = 0;
+        isEnteringManualInput = false;
+        tape = [];
+        tearTokens = [];
+        paperTapeEntries = [];
+        
+        // Clear paper tape display
+        clearPaperTape();
+        
+        // Reset display
+        document.getElementById('display').textContent = '0';
+        
+        // Reset print mode
+        printMode = false;
+        const slider = document.getElementById('printSlider');
+        slider.value = 0;
+        slider.classList.remove('active');
+        
+        // Hide tokens sidebar
+        const sidebar = document.getElementById('tokensSidebar');
+        sidebar.classList.remove('show');
+        
+        // Update token list (should be empty now)
+        await updateTokenList();
+        
+        console.log('Complete reset performed - all data cleared');
+      } catch (error) {
+        console.error('Failed to reset all data:', error);
+        // Fallback: at least clear local state
+        current = '';
+        total = 0;
+        lastValue = 0;
+        lastOp = null;
+        repeatValue = null;
+        isMulDiv = false;
+        memory = [];
+        grandTotal = 0;
+        isEnteringManualInput = false;
+        tape = [];
+        tearTokens = [];
+        paperTapeEntries = [];
+        clearPaperTape();
+        document.getElementById('display').textContent = '0';
+      }
     }
 
     async function press(key) {
