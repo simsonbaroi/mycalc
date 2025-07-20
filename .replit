@@ -13,11 +13,12 @@ runButton = "Open Calculator"
 
 [[workflows.workflow]]
 name = "Open Calculator"
-mode = "sequential"
+mode = "parallel"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "echo \"Calculator is ready! Open the Preview tab to use it.\""
+args = "static-web-server -p 5000 -d . -i index.html"
+waitForPort = 5000
 
 [[ports]]
 localPort = 80
