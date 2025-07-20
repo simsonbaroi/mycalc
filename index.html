@@ -1034,6 +1034,9 @@
       overflow-y: auto;
       font-size: 12px;
       font-family: 'Courier New', monospace;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
     .token-list::-webkit-scrollbar {
@@ -1057,13 +1060,10 @@
     .token-item {
       border: 1px solid #9ca3af;
       border-radius: 4px;
-      margin: 4px;
       padding: 8px;
       cursor: pointer;
       transition: background-color 0.2s ease;
-      display: inline-block;
-      width: calc(50% - 10px);
-      vertical-align: top;
+      flex: 0 0 calc(50% - 4px);
       box-sizing: border-box;
     }
 
