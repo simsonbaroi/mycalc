@@ -131,7 +131,7 @@
 
     
 
-    /* Paper roll container */
+    /* Simplified paper container - just a clean white paper area */
     .paper-roll-container {
       position: absolute;
       bottom: 50%;
@@ -140,210 +140,47 @@
       width: 300px;
       height: 60px;
       overflow: visible;
-      background: linear-gradient(145deg, #2a2a2a 0%, #1f1f1f 100%);
-      border: 2px inset #555555;
-      border-radius: 8px;
-      box-shadow: 
-        inset 0 2px 8px rgba(0,0,0,0.5),
-        0 1px 3px rgba(0,0,0,0.3);
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
       z-index: 1;
     }
 
-    body.dark .paper-roll-container {
-      background: linear-gradient(145deg, #1a1a1a 0%, #0f0f0f 100%);
-      border: 2px inset #333333;
-    }
-
-    /* Paper emergence effect from slot */
-    .paper-roll-container::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 2.25in;
-      height: 4px; /* Reduced height to match slot better */
-      background: linear-gradient(to right, 
-        #ffffff 0%, 
-        #fefefe 50%,
-        #ffffff 100%);
-      border-left: 1px solid #e8e8e8;
-      border-right: 1px solid #e8e8e8;
-      border-top: none;
-      border-bottom: none;
-      z-index: 15;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .paper-roll-container.has-tape::after {
-      opacity: 1;
-    }
-
-    /* Paper roll bridge between slot and tape */
-    .paper-roll-container::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 2.25in;
-      height: 6px;
-      background: linear-gradient(to right, 
-        #ffffff 0%, 
-        #fefefe 25%,
-        #ffffff 50%,
-        #fefefe 75%,
-        #ffffff 100%);
-      border-left: 1px solid #e8e8e8;
-      border-right: 1px solid #e8e8e8;
-      z-index: 101; /* Higher than tape to appear above calculator */
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      box-shadow: 
-        0 1px 2px rgba(0,0,0,0.1),
-        inset 0 1px 0 rgba(255,255,255,0.8);
-      /* Paper perforations on bridge */
-      background-image: 
-        radial-gradient(circle at 4px 3px, transparent 1px, #ffffff 1px),
-        radial-gradient(circle at calc(2.25in - 4px) 3px, transparent 1px, #ffffff 1px);
-      background-size: 8px 6px, 8px 6px;
-      background-position: left center, right center;
-      background-repeat: no-repeat;
-    }
-
-    .paper-roll-container.has-tape::before {
-      opacity: 1;
-    }
-
-    /* Paper roll slot */
-    .paper-slot {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 2.25in; /* Match tape width exactly */
-      height: 3px;
-      background: linear-gradient(180deg, #1a1a1a 0%, #333333 50%, #1a1a1a 100%);
-      border-radius: 2px;
-      box-shadow: 
-        inset 0 2px 4px rgba(0,0,0,0.8),
-        0 1px 0 rgba(255,255,255,0.1);
-      z-index: 2;
-    }
-
-
-
-    /* Paper guide rails */
-    .paper-slot::after {
-      content: '';
-      position: absolute;
-      top: -2px;
-      left: 0;
-      right: 0;
-      height: 7px;
-      background: linear-gradient(180deg, 
-        rgba(255,255,255,0.1) 0%, 
-        rgba(0,0,0,0.2) 50%,
-        rgba(255,255,255,0.1) 100%);
-      border-radius: 2px;
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
-    }
-
-    /* Paper tape container - Enhanced scrolling */
+    /* Clean white paper tape that grows from bottom to top */
     .paper-tape {
       position: absolute;
-      top: calc(100% + 3px); /* Start below the paper roll bridge */
+      top: calc(100% + 5px);
       left: 50%;
       transform: translateX(-50%);
-      width: 2.25in; /* Standard adding machine tape width */
-      background: linear-gradient(to right, 
-        #ffffff 0%, 
-        #ffffff 5%, 
-        #fefefe 10%,
-        #ffffff 15%,
-        #fefefe 20%,
-        #ffffff 25%,
-        #fefefe 30%,
-        #ffffff 35%,
-        #fefefe 40%,
-        #ffffff 45%,
-        #fefefe 50%,
-        #ffffff 55%,
-        #fefefe 60%,
-        #ffffff 65%,
-        #fefefe 70%,
-        #ffffff 75%,
-        #fefefe 80%,
-        #ffffff 85%,
-        #fefefe 90%,
-        #ffffff 95%,
-        #ffffff 100%);
-      border-left: 1px solid #e8e8e8;
-      border-right: 1px solid #e8e8e8;
-      border-top: none; /* Remove top border to blend seamlessly with slot */
-      /* Add top margin to ensure no gap */
-      margin-top: 1px;
+      width: 2.25in;
+      background: #ffffff;
+      border-left: 1px solid #ddd;
+      border-right: 1px solid #ddd;
+      border-bottom: 1px solid #ddd;
+      border-top: none;
       font-family: 'Courier New', monospace;
       font-size: 10px;
-      color: #1a1a1a;
+      color: #000;
       box-shadow: 
-        -2px 0 6px rgba(0,0,0,0.15),
-        2px 0 6px rgba(0,0,0,0.15),
-        0 2px 8px rgba(0,0,0,0.2);
-      transition: opacity 0.3s ease, box-shadow 0.3s ease;
-      max-height: 500px; /* Further increased height for better scrolling */
-      min-height: 150px; /* Increased minimum height to show more content area */
+        0 2px 8px rgba(0,0,0,0.1),
+        -1px 0 3px rgba(0,0,0,0.05),
+        1px 0 3px rgba(0,0,0,0.05);
+      transition: opacity 0.3s ease;
+      max-height: 500px;
+      min-height: 20px;
       overflow-y: auto;
       overflow-x: hidden;
       opacity: 0;
-      z-index: 100; /* Much higher z-index to appear above calculator elements */
+      z-index: 100;
       display: flex;
-      flex-direction: column;
-      /* Enhanced scrolling properties */
+      flex-direction: column-reverse; /* This makes new entries appear at bottom */
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-y: contain;
       scroll-behavior: smooth;
       touch-action: pan-y;
-      /* Ensure proper interaction */
       pointer-events: auto;
-      /* Add padding for better touch targets */
-      padding: 4px 0;
-    }
-
-    /* Paper tape perforations - positioned behind text */
-    .paper-tape::before {
-      content: '';
-      position: absolute;
-      left: -1px;
-      top: 0;
-      bottom: 0;
-      width: 8px;
-      background-image: 
-        radial-gradient(circle at 4px 8px, transparent 1.5px, #ffffff 1.5px),
-        radial-gradient(circle at 4px 24px, transparent 1.5px, #ffffff 1.5px),
-        radial-gradient(circle at 4px 40px, transparent 1.5px, #ffffff 1.5px);
-      background-size: 8px 16px;
-      background-repeat: repeat-y;
-      border-right: 1px solid #f0f0f0;
-      z-index: -1; /* Behind the text */
-    }
-
-    .paper-tape::after {
-      content: '';
-      position: absolute;
-      right: -1px;
-      top: 0;
-      bottom: 0;
-      width: 8px;
-      background-image: 
-        radial-gradient(circle at 4px 8px, transparent 1.5px, #ffffff 1.5px),
-        radial-gradient(circle at 4px 24px, transparent 1.5px, #ffffff 1.5px),
-        radial-gradient(circle at 4px 40px, transparent 1.5px, #ffffff 1.5px);
-      background-size: 8px 16px;
-      background-repeat: repeat-y;
-      border-left: 1px solid #f0f0f0;
-      z-index: -1; /* Behind the text */
+      padding: 8px 0;
     }
 
     /* Enhanced hover state for better interaction */
@@ -378,59 +215,38 @@
 
     /* Individual paper entries */
     .paper-entry {
-      padding: 3px 12px 3px 16px;
+      padding: 2px 8px;
       text-align: right;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       opacity: 0;
-      transform: translateY(-10px);
-      animation: entrySlideIn 0.4s ease-out forwards;
-      line-height: 1.4;
-      font-weight: 500;
-      position: relative;
-      border-bottom: 1px solid rgba(0,0,0,0.05);
-      min-height: 16px;
-      z-index: 102; /* Highest z-index for emergence effect */
-      /* Ensure entries are interactive */
-      pointer-events: auto;
-      /* Ensure text is readable over background */
-      background: rgba(255,255,255,0.95);
+      transform: translateY(10px); /* Changed to slide up from bottom */
+      animation: entrySlideUp 0.3s ease-out forwards;
+      line-height: 1.3;
+      font-weight: normal;
+      min-height: 14px;
+      background: transparent;
+      border-bottom: none;
+      margin-bottom: 1px;
     }
 
     /* Manual entries (printed with #) are left-aligned and black */
     .paper-entry.manual-entry {
       text-align: left;
-      padding: 3px 16px 3px 12px;
-      font-weight: 800;
-      color: #1a1a1a;
-      background: rgba(255,255,255,0.98);
-      text-shadow: 0 0 0.5px rgba(26,26,26,0.8);
+      font-weight: bold;
+      color: #000;
     }
 
-    /* Add subtle zebra striping like real adding machine tape */
-    .paper-entry:nth-child(even) {
-      background: rgba(245,245,245,0.3);
-    }
-
-    /* Simulate light print impression on paper */
-    .paper-entry {
-      text-shadow: 0 0 0.5px rgba(26,26,26,0.8);
-    }
-
+    /* Keep dark mode entries clean */
     body.dark .paper-entry {
-      background: rgba(240,240,240,0.95);
-      color: #222222;
-    }
-
-    body.dark .paper-entry:nth-child(even) {
-      background: rgba(235,235,235,0.95);
+      background: transparent;
+      color: #000;
     }
 
     body.dark .paper-entry.manual-entry {
-      background: rgba(245,245,245,0.98);
-      color: #1a1a1a;
-      text-shadow: 0 0 0.5px rgba(26,26,26,0.8);
+      background: transparent;
+      color: #000;
     }
 
     /* Red text entries (like subtraction) stay right-aligned but are red */
@@ -533,10 +349,10 @@
       background: transparent;
     }
 
-    @keyframes entrySlideIn {
+    @keyframes entrySlideUp {
       0% {
         opacity: 0;
-        transform: translateY(-10px);
+        transform: translateY(10px);
       }
       100% {
         opacity: 1;
@@ -544,112 +360,28 @@
       }
     }
 
-    /* Paper strip for new entries animation */
+    /* Simplified paper strip for new entries animation */
     .paper-strip {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 2.25in; /* Match tape width */
-      background: linear-gradient(to right, 
-        #ffffff 0%, 
-        #ffffff 5%, 
-        #fefefe 10%,
-        #ffffff 15%,
-        #fefefe 20%,
-        #ffffff 25%,
-        #fefefe 30%,
-        #ffffff 35%,
-        #fefefe 40%,
-        #ffffff 45%,
-        #fefefe 50%,
-        #ffffff 55%,
-        #fefefe 60%,
-        #ffffff 65%,
-        #fefefe 70%,
-        #ffffff 75%,
-        #fefefe 80%,
-        #ffffff 85%,
-        #fefefe 90%,
-        #ffffff 95%,
-        #ffffff 100%);
-      border-left: 1px solid #e8e8e8;
-      border-right: 1px solid #e8e8e8;
+      width: 2.25in;
+      background: #ffffff;
+      border-left: 1px solid #ddd;
+      border-right: 1px solid #ddd;
       font-family: 'Courier New', monospace;
       font-size: 10px;
       text-align: right;
-      padding: 2px 12px 2px 16px;
-      box-shadow: 
-        -1px 0 3px rgba(0,0,0,0.1),
-        1px 0 3px rgba(0,0,0,0.1),
-        0 2px 4px rgba(0,0,0,0.15);
+      padding: 2px 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       opacity: 0;
       height: 16px;
       line-height: 12px;
       white-space: nowrap;
       overflow: hidden;
-      color: #1a1a1a;
+      color: #000;
       z-index: 3;
-      font-weight: 500;
-      text-shadow: 0 0 0.5px rgba(26,26,26,0.8);
-    }
-
-    /* Add perforations to animated strip */
-    .paper-strip::before {
-      content: '';
-      position: absolute;
-      left: -1px;
-      top: 0;
-      bottom: 0;
-      width: 8px;
-      background-image: radial-gradient(circle at 4px 8px, transparent 1px, #ffffff 1px);
-      background-size: 8px 16px;
-      background-repeat: repeat-y;
-    }
-
-    .paper-strip::after {
-      content: '';
-      position: absolute;
-      right: -1px;
-      top: 0;
-      bottom: 0;
-      width: 8px;
-      background-image: radial-gradient(circle at 4px 8px, transparent 1px, #ffffff 1px);
-      background-size: 8px 16px;
-      background-repeat: repeat-y;
-    }
-
-    body.dark .paper-strip {
-      background: linear-gradient(to right, 
-        #f0f0f0 0%, 
-        #f0f0f0 5%, 
-        #eeeeee 10%,
-        #f0f0f0 15%,
-        #eeeeee 20%,
-        #f0f0f0 25%,
-        #eeeeee 30%,
-        #f0f0f0 35%,
-        #eeeeee 40%,
-        #f0f0f0 45%,
-        #eeeeee 50%,
-        #f0f0f0 55%,
-        #eeeeee 60%,
-        #f0f0f0 65%,
-        #eeeeee 70%,
-        #f0f0f0 75%,
-        #eeeeee 80%,
-        #f0f0f0 85%,
-        #eeeeee 90%,
-        #f0f0f0 95%,
-        #f0f0f0 100%);
-      border-left: 1px solid #cccccc;
-      border-right: 1px solid #cccccc;
-      color: #222222;
-    }
-
-    body.dark .paper-strip.manual-entry {
-      color: #1a1a1a;
-      text-shadow: 0 0 0.5px rgba(26,26,26,0.8);
     }
 
     /* Manual entries in paper strip animation are left-aligned and black */
@@ -668,31 +400,15 @@
       font-weight: 600;
     }
 
-    /* Paper roll animation */
+    /* Simplified paper animation - slide down to tape */
     @keyframes paperRollOut {
       0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) translateY(0px) scaleY(0.1) rotateX(15deg);
-      }
-      15% {
         opacity: 1;
-        transform: translate(-50%, -50%) translateY(-2px) scaleY(1) rotateX(0deg);
-      }
-      25% {
-        opacity: 1;
-        transform: translate(-50%, -50%) translateY(0px) scaleY(1) rotateX(0deg);
-      }
-      75% {
-        opacity: 1;
-        transform: translate(-50%, -50%) translateY(8px) scaleY(1) rotateX(-2deg);
-      }
-      90% {
-        opacity: 0.7;
-        transform: translate(-50%, -50%) translateY(15px) scaleY(0.95) rotateX(-5deg);
+        transform: translate(-50%, -50%) translateY(0px);
       }
       100% {
         opacity: 0;
-        transform: translate(-50%, -50%) translateY(25px) scaleY(0.8) rotateX(-10deg);
+        transform: translate(-50%, -50%) translateY(40px);
       }
     }
 
@@ -700,41 +416,7 @@
       animation: paperRollOut 1s ease-out forwards;
     }
 
-    /* Printer mechanism visual */
-    .printer-mechanism {
-      position: absolute;
-      top: 10px;
-      right: 15px;
-      width: 20px;
-      height: 20px;
-      background: radial-gradient(circle, #666666 0%, #333333 100%);
-      border-radius: 50%;
-      box-shadow: 
-        0 2px 4px rgba(0,0,0,0.3),
-        inset 0 1px 0 rgba(255,255,255,0.2);
-    }
-
-    .printer-mechanism::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 8px;
-      height: 8px;
-      background: #222222;
-      border-radius: 50%;
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.8);
-    }
-
-    .printer-mechanism.active {
-      animation: printerSpin 0.5s linear infinite;
-    }
-
-    @keyframes printerSpin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
+    
 
     .top-controls {
       display: flex;
@@ -1314,8 +996,6 @@
     </div>
     <div class="calculator">
       <div class="paper-roll-container" id="paperRollContainer">
-        <div class="paper-slot"></div>
-        <div class="printer-mechanism" id="printerMechanism"></div>
         <div class="paper-tape" id="paperTape" onclick="enableTapeScrolling()" onmousedown="enableTapeScrolling()" ontouchstart="enableTapeScrolling()" tabindex="0"></div>
       </div>
       <div class="top-controls">
@@ -1545,8 +1225,6 @@
 
     function animatePaperRoll(text, isLeftAligned = false, isRedText = false) {
       const container = document.getElementById('paperRollContainer');
-      const mechanism = document.getElementById('printerMechanism');
-      const paperTape = document.getElementById('paperTape');
 
       // Create paper strip for animation
       const paperStrip = document.createElement('div');
@@ -1562,26 +1240,20 @@
       // Add to container
       container.appendChild(paperStrip);
 
-      // Start printer mechanism animation
-      mechanism.classList.add('active');
-
       // Start paper roll animation
       setTimeout(() => {
         paperStrip.classList.add('animate');
-      }, 100);
+      }, 50);
 
-      // Add entry to permanent tape after animation starts
-      setTimeout(() => {
-        addToPaperTape(text, isLeftAligned, isRedText);
-      }, 300);
+      // Add entry to permanent tape immediately
+      addToPaperTape(text, isLeftAligned, isRedText);
 
-      // Stop printer mechanism and remove paper strip after animation
+      // Remove paper strip after animation
       setTimeout(() => {
-        mechanism.classList.remove('active');
         if (paperStrip.parentNode) {
           paperStrip.parentNode.removeChild(paperStrip);
         }
-      }, 1000);
+      }, 600);
     }
 
     function addToPaperTape(text, isLeftAligned = false, isRedText = false) {
@@ -1601,15 +1273,12 @@
       }
       entry.textContent = text;
 
-      // Add entry to tape (at the bottom for downward growth like real adding machine)
-      paperTape.appendChild(entry);
+      // Add entry to tape (prepend for bottom-to-top growth with flex-direction: column-reverse)
+      paperTape.insertBefore(entry, paperTape.firstChild);
 
       // Show tape if this is the first entry
       if (paperTapeEntries.length === 1) {
         paperTape.classList.add('visible');
-        // Add visual connection to the slot
-        const container = document.getElementById('paperRollContainer');
-        container.classList.add('has-tape');
       }
 
       // Auto-enable scrolling after 8 entries or when content overflows
@@ -1620,10 +1289,10 @@
       // Update scroll indicator based on content
       updateScrollIndicator();
 
-      // Auto-scroll to bottom to show latest entries
+      // Keep scroll at bottom to show new entries as they appear
       setTimeout(() => {
         paperTape.scrollTop = paperTape.scrollHeight;
-      }, 10);
+      }, 50);
     }
 
     function clearPaperTape() {
