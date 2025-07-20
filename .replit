@@ -17,7 +17,7 @@ mode = "parallel"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "static-web-server -p 5000 -d . -i index.html"
+args = "static-web-server -p 5000 -d ."
 waitForPort = 5000
 
 [[ports]]
