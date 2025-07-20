@@ -36,7 +36,7 @@
       align-items: flex-start;
       justify-content: center;
       width: 100%;
-      max-width: 1200px;
+      max-width: 1400px;
       margin: 0 auto;
       position: relative;
       z-index: 1;
@@ -117,6 +117,7 @@
       transition: all 0.3s ease;
       margin: 0 auto;
       z-index: 10;
+      margin-right: 350px;
     }
 
     body.dark .calculator {
@@ -133,10 +134,11 @@
 
     /* Paper roll container */
     .paper-roll-container {
-      position: relative;
-      width: 100%;
+      position: absolute;
+      top: 0;
+      right: -320px;
+      width: 300px;
       height: 60px;
-      margin: 20px 0;
       overflow: visible;
       background: linear-gradient(145deg, #2a2a2a 0%, #1f1f1f 100%);
       border: 2px inset #555555;
@@ -1113,6 +1115,18 @@
       .main-container {
         flex-direction: column;
         align-items: center;
+      }
+
+      .calculator {
+        margin-right: 0;
+      }
+
+      .paper-roll-container {
+        position: relative;
+        top: auto;
+        right: auto;
+        width: 100%;
+        margin: 20px 0;
       }
 
       .tokens-sidebar {
