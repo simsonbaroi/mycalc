@@ -135,7 +135,7 @@
     /* Paper roll container */
     .paper-roll-container {
       position: absolute;
-      top: 0;
+      bottom: 0;
       right: -320px;
       width: 300px;
       height: 60px;
@@ -253,7 +253,7 @@
     /* Paper tape container - Enhanced scrolling */
     .paper-tape {
       position: absolute;
-      bottom: calc(100% + 3px); /* Start above the paper roll bridge */
+      top: calc(100% + 3px); /* Start below the paper roll bridge */
       left: 50%;
       transform: translateX(-50%);
       width: 2.25in; /* Standard adding machine tape width */
@@ -290,7 +290,7 @@
       box-shadow: 
         -2px 0 6px rgba(0,0,0,0.15),
         2px 0 6px rgba(0,0,0,0.15),
-        0 -2px 8px rgba(0,0,0,0.2);
+        0 2px 8px rgba(0,0,0,0.2);
       transition: opacity 0.3s ease, box-shadow 0.3s ease;
       max-height: 500px; /* Further increased height for better scrolling */
       min-height: 150px; /* Increased minimum height to show more content area */
@@ -349,8 +349,8 @@
     /* Enhanced hover state for better interaction */
     .paper-tape:hover {
       box-shadow: 
-        2px -2px 12px rgba(0,0,0,0.4),
-        inset 0 -1px 0 rgba(255,255,255,0.8),
+        2px 2px 12px rgba(0,0,0,0.4),
+        inset 0 1px 0 rgba(255,255,255,0.8),
         0 0 0 2px rgba(100, 100, 100, 0.3);
       z-index: 60; /* Even higher on hover */
       cursor: pointer;
@@ -359,8 +359,8 @@
     /* Active state for click feedback */
     .paper-tape:active {
       box-shadow: 
-        1px -1px 6px rgba(0,0,0,0.3),
-        inset 0 -1px 0 rgba(255,255,255,0.6),
+        1px 1px 6px rgba(0,0,0,0.3),
+        inset 0 1px 0 rgba(255,255,255,0.6),
         0 0 0 3px rgba(100, 100, 100, 0.5);
       transform: translateX(-50%) scale(0.98);
     }
@@ -1123,7 +1123,7 @@
 
       .paper-roll-container {
         position: relative;
-        top: auto;
+        bottom: auto;
         right: auto;
         width: 100%;
         margin: 20px 0;
