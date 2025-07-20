@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1298,6 +1299,119 @@
   </div>
 
   <script>
+    // IndexedDB Storage Management
+    class CalculatorStorage {
+      constructor() {
+        this.dbName = 'CalculatorDB';
+        this.version = 1;
+        this.db = null;
+      }
+
+      async init() {
+        return new Promise((resolve, reject) => {
+          const request = indexedDB.open(this.dbName, this.version);
+          
+          request.onerror = () => reject(request.error);
+          request.onsuccess = () => {
+            this.db = request.result;
+            resolve();
+          };
+          
+          request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            
+            // Create tokens store
+            if (!db.objectStoreNames.contains('tokens')) {
+              const tokensStore = db.createObjectStore('tokens', { keyPath: 'id', autoIncrement: true });
+              tokensStore.createIndex('timestamp', 'timestamp', { unique: false });
+            }
+            
+            // Create calculations store
+            if (!db.objectStoreNames.contains('calculations')) {
+              const calcStore = db.createObjectStore('calculations', { keyPath: 'id', autoIncrement: true });
+              calcStore.createIndex('timestamp', 'timestamp', { unique: false });
+            }
+          };
+        });
+      }
+
+      async saveToken(tokenData) {
+        return new Promise((resolve, reject) => {
+          const transaction = this.db.transaction(['tokens'], 'readwrite');
+          const store = transaction.objectStore('tokens');
+          const request = store.add({
+            data: tokenData,
+            timestamp: new Date().toISOString()
+          });
+          
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error);
+        });
+      }
+
+      async getTokens() {
+        return new Promise((resolve, reject) => {
+          const transaction = this.db.transaction(['tokens'], 'readonly');
+          const store = transaction.objectStore('tokens');
+          const request = store.getAll();
+          
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error);
+        });
+      }
+
+      async deleteToken(id) {
+        return new Promise((resolve, reject) => {
+          const transaction = this.db.transaction(['tokens'], 'readwrite');
+          const store = transaction.objectStore('tokens');
+          const request = store.delete(id);
+          
+          request.onsuccess = () => resolve();
+          request.onerror = () => reject(request.error);
+        });
+      }
+
+      async clearAllTokens() {
+        return new Promise((resolve, reject) => {
+          const transaction = this.db.transaction(['tokens'], 'readwrite');
+          const store = transaction.objectStore('tokens');
+          const request = store.clear();
+          
+          request.onsuccess = () => resolve();
+          request.onerror = () => reject(request.error);
+        });
+      }
+
+      async saveCalculation(calculation) {
+        return new Promise((resolve, reject) => {
+          const transaction = this.db.transaction(['calculations'], 'readwrite');
+          const store = transaction.objectStore('calculations');
+          const request = store.add({
+            calculation: calculation,
+            timestamp: new Date().toISOString()
+          });
+          
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error);
+        });
+      }
+
+      async getCalculations() {
+        return new Promise((resolve, reject) => {
+          const transaction = this.db.transaction(['calculations'], 'readonly');
+          const store = transaction.objectStore('calculations');
+          const request = store.getAll();
+          
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error);
+        });
+      }
+    }
+
+    // Initialize storage
+    const storage = new CalculatorStorage();
+
+    // Calculator variables
     let current = '';
     let total = 0;
     let lastValue = 0;
@@ -1500,14 +1614,27 @@
       }
     }
 
-    function updateTokenList() {
-      const list = document.getElementById('tokenList');
-      list.innerHTML = tearTokens.map((t, i) => `<div class="token-item" onclick="loadToken(${i})"><strong>Token ${i + 1}:</strong><br>${t.join('<br>')}</div>`).join('');
+    async function updateTokenList() {
+      try {
+        const tokens = await storage.getTokens();
+        tearTokens = tokens.map(t => t.data); // Keep legacy format for compatibility
+        
+        const list = document.getElementById('tokenList');
+        list.innerHTML = tokens.map((t, i) => `
+          <div class="token-item" onclick="loadToken(${i})">
+            <strong>Token ${i + 1}:</strong><br>
+            ${t.data.join('<br>')}
+            <br><small style="color: #666;">Saved: ${new Date(t.timestamp).toLocaleString()}</small>
+          </div>
+        `).join('');
 
-      // Auto-show tokens sidebar when there are tokens
-      const sidebar = document.getElementById('tokensSidebar');
-      if (tearTokens.length > 0) {
-        sidebar.classList.add('show');
+        // Auto-show tokens sidebar when there are tokens
+        const sidebar = document.getElementById('tokensSidebar');
+        if (tokens.length > 0) {
+          sidebar.classList.add('show');
+        }
+      } catch (error) {
+        console.error('Failed to update token list:', error);
       }
     }
 
@@ -1548,7 +1675,7 @@
       updateDisplay();
     }
 
-    function press(key) {
+    async function press(key) {
       // Add button press animation
       const activeButtons = document.querySelectorAll('button:active');
       activeButtons.forEach(btn => {
@@ -1583,14 +1710,27 @@
       }
       if (key === 'Tear') {
         if (tape.length > 0) {
-          tearTokens.push([...tape]);
-          tape = []; // Clear the tape preview
-          updateTokenList();
-          animatePaperRoll('[Tear]');
-          // Clear the paper tape after tearing
-          setTimeout(() => {
-            clearPaperTape();
-          }, 1500);
+          try {
+            // Save to IndexedDB
+            await storage.saveToken([...tape]);
+            tape = []; // Clear the tape preview
+            await updateTokenList();
+            animatePaperRoll('[Tear]');
+            // Clear the paper tape after tearing
+            setTimeout(() => {
+              clearPaperTape();
+            }, 1500);
+          } catch (error) {
+            console.error('Failed to save token:', error);
+            // Fallback to memory storage
+            tearTokens.push([...tape]);
+            tape = [];
+            updateTokenList();
+            animatePaperRoll('[Tear]');
+            setTimeout(() => {
+              clearPaperTape();
+            }, 1500);
+          }
         }
         return;
       }
@@ -1819,9 +1959,22 @@
     }
 
     // Initialize calculator
-    updateDisplay();
-    initializeTheme();
-    initializePaperTape();
+    async function initializeCalculator() {
+      try {
+        await storage.init();
+        await updateTokenList();
+        console.log('Calculator storage initialized successfully');
+      } catch (error) {
+        console.error('Failed to initialize storage, using memory storage:', error);
+      }
+      
+      updateDisplay();
+      initializeTheme();
+      initializePaperTape();
+    }
+
+    // Start the calculator when page loads
+    document.addEventListener('DOMContentLoaded', initializeCalculator);
   </script>
 </body>
 </html>

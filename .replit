@@ -11,7 +11,7 @@ deploymentTarget = "static"
 run = ["sh", "-c", "python server.py"]
 
 [workflows]
-runButton = "Serve static"
+runButton = "Open Calculator"
 
 [[workflows.workflow]]
 name = "Serve static"
@@ -25,6 +25,15 @@ To see changes you make, you can hit the refresh button in the preview, you do \
 Console logs are available in the Preview devtools or your browser devtools.\" && static-web-server -w ./.config/static-web-server.toml > /dev/null 2>&1
 """
 waitForPort = 80
+
+[[workflows.workflow]]
+name = "Open Calculator"
+author = 45282640
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Calculator is ready! Open the Preview tab to use it.\""
 
 [[ports]]
 localPort = 80
