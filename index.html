@@ -131,53 +131,7 @@
 
     
 
-    /* Completely hidden paper container */
-    .paper-roll-container {
-      position: absolute;
-      bottom: 50%;
-      left: 100%;
-      margin-left: 20px;
-      width: 0;
-      height: 0;
-      overflow: visible;
-      background: none;
-      border: none;
-      border-radius: 0;
-      box-shadow: none;
-      z-index: 1;
-      pointer-events: none;
-      visibility: hidden;
-    }
-
-    /* Clean white paper tape that grows upward from bottom */
-    .paper-tape {
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 2.25in;
-      background: #ffffff;
-      border: none;
-      font-family: 'Courier New', monospace;
-      font-size: 10px;
-      color: #000;
-      box-shadow: none;
-      transition: opacity 0.3s ease;
-      max-height: 500px;
-      min-height: 20px;
-      overflow-y: auto;
-      overflow-x: hidden;
-      opacity: 0;
-      z-index: 100;
-      display: flex;
-      flex-direction: column; /* Normal direction so new entries appear at bottom and grow upward */
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior-y: contain;
-      scroll-behavior: smooth;
-      touch-action: pan-y;
-      pointer-events: auto;
-      padding: 8px 0;
-    }
+    
 
     /* Enhanced hover state for better interaction */
     .paper-tape:hover {
@@ -991,9 +945,6 @@
       <div class="token-list" id="tokenList"></div>
     </div>
     <div class="calculator">
-      <div class="paper-roll-container" id="paperRollContainer">
-        <div class="paper-tape" id="paperTape" onclick="enableTapeScrolling()" onmousedown="enableTapeScrolling()" ontouchstart="enableTapeScrolling()" tabindex="0"></div>
-      </div>
       <div class="top-controls">
         <button onclick="press('Tear')">Tear</button>
         <button onclick="press('Reprint')">Reprint</button>
@@ -1220,84 +1171,17 @@
     }
 
     function animatePaperRoll(text, isLeftAligned = false, isRedText = false) {
-      const container = document.getElementById('paperRollContainer');
-
-      // Create paper strip for animation
-      const paperStrip = document.createElement('div');
-      paperStrip.className = 'paper-strip';
-      if (isLeftAligned) {
-        paperStrip.classList.add('manual-entry');
-      }
-      if (isRedText) {
-        paperStrip.classList.add('red-text');
-      }
-      paperStrip.textContent = text;
-
-      // Add to container
-      container.appendChild(paperStrip);
-
-      // Start paper roll animation
-      setTimeout(() => {
-        paperStrip.classList.add('animate');
-      }, 50);
-
-      // Add entry to permanent tape immediately
-      addToPaperTape(text, isLeftAligned, isRedText);
-
-      // Remove paper strip after animation
-      setTimeout(() => {
-        if (paperStrip.parentNode) {
-          paperStrip.parentNode.removeChild(paperStrip);
-        }
-      }, 600);
+      // Simple console log instead of visual animation
+      console.log((isLeftAligned ? '# ' : '') + text);
     }
 
     function addToPaperTape(text, isLeftAligned = false, isRedText = false) {
-      const paperTape = document.getElementById('paperTape');
-
-      // Add to entries array
+      // Add to entries array for tracking
       paperTapeEntries.push(text);
-
-      // Create new entry element
-      const entry = document.createElement('div');
-      entry.className = 'paper-entry';
-      if (isLeftAligned) {
-        entry.classList.add('manual-entry');
-      }
-      if (isRedText) {
-        entry.classList.add('red-text');
-      }
-      entry.textContent = text;
-
-      // Add entry to tape (append at bottom for upward growth)
-      paperTape.appendChild(entry);
-
-      // Show tape if this is the first entry
-      if (paperTapeEntries.length === 1) {
-        paperTape.classList.add('visible');
-      }
-
-      // Auto-enable scrolling after 8 entries or when content overflows
-      if (paperTapeEntries.length >= 8) {
-        paperTape.classList.add('scrollable');
-      }
-
-      // Update scroll indicator based on content
-      updateScrollIndicator();
-
-      // Keep scroll at bottom to show new entries as they appear
-      setTimeout(() => {
-        paperTape.scrollTop = paperTape.scrollHeight;
-      }, 50);
     }
 
     function clearPaperTape() {
-      const paperTape = document.getElementById('paperTape');
-      const container = document.getElementById('paperRollContainer');
-      paperTape.innerHTML = '';
-      paperTape.classList.remove('visible');
-      paperTape.classList.remove('scrollable');
-      container.classList.remove('has-tape');
+      // Clear entries array
       paperTapeEntries = [];
     }
 
