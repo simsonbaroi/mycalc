@@ -131,21 +131,22 @@
 
     
 
-    /* Hidden paper container - no visible design */
+    /* Completely hidden paper container */
     .paper-roll-container {
       position: absolute;
       bottom: 50%;
       left: 100%;
       margin-left: 20px;
-      width: 300px;
+      width: 0;
       height: 0;
       overflow: visible;
-      background: transparent;
+      background: none;
       border: none;
       border-radius: 0;
       box-shadow: none;
       z-index: 1;
       pointer-events: none;
+      visibility: hidden;
     }
 
     /* Clean white paper tape that grows upward from bottom */
@@ -156,17 +157,11 @@
       transform: translateX(-50%);
       width: 2.25in;
       background: #ffffff;
-      border-left: 1px solid #ddd;
-      border-right: 1px solid #ddd;
-      border-top: 1px solid #ddd;
-      border-bottom: none;
+      border: none;
       font-family: 'Courier New', monospace;
       font-size: 10px;
       color: #000;
-      box-shadow: 
-        0 -2px 8px rgba(0,0,0,0.1),
-        -1px 0 3px rgba(0,0,0,0.05),
-        1px 0 3px rgba(0,0,0,0.05);
+      box-shadow: none;
       transition: opacity 0.3s ease;
       max-height: 500px;
       min-height: 20px;
